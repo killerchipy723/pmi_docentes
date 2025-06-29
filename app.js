@@ -11,7 +11,7 @@ const pdfmake = require('pdfmake/build/pdfmake');
 const vfsFonts = require('pdfmake/build/vfs_fonts');
 pdfmake.vfs = vfsFonts.pdfMake.vfs; // Cargar fuentes
 
-const port = 5100;
+const port = 6100;
  
 // Configurar middleware
 app.use(bodyParser.urlencoded({ extended: true }));
@@ -68,10 +68,10 @@ app.get('/attendance-page', (req, res) => {
 
 
 
-// Ruta para buscar alumno por DNI
+// Ruta para buscar docentes por DNI
 app.post('/buscar-alumno', (req, res) => {
     const { dni } = req.body;
-    const query = 'SELECT * FROM alu3 WHERE dni = ?';
+    const query = 'SELECT * FROM docentes WHERE dni = ?';
 
     db.query(query, [dni], (err, result) => {
         if (err) {
@@ -79,44 +79,44 @@ app.post('/buscar-alumno', (req, res) => {
         } else if (result.length > 0) {
             res.send({ success: true, alumno: result[0] });
         } else {
-            res.send({ success: false, message: 'Alumno no encontrado' });
+            res.send({ success: false, message: 'Docente no encontrado' });
         }
     });
 });
 
 app.post('/register', (req, res) => {
-    const { apenomb, dni, carrera, anio } = req.body;
+    const { apenomb, dni, email } = req.body;
 
     // Verificar si el alumno ya está registrado por DNI
-    const checkQuery = `SELECT * FROM alu3 WHERE dni = ?`;
+    const checkQuery = `SELECT * FROM docentes WHERE dni = ?`;
     db.query(checkQuery, [dni], (err, result) => {
         if (err) {
-            console.log('Error al verificar alumno:', err);
+            console.log('Error al verificar Docente:', err);
             return res.json({ success: false, message: 'Error en la validación.' });
         }
 
         if (result.length > 0) {
             // Si ya existe un registro con ese DNI, devolver mensaje de alerta
-            return res.json({ success: false, message: 'El alumno ya está registrado.' });
+            return res.json({ success: false, message: 'El Docente ya está registrado.' });
         }
 
         // Si el alumno no existe, proceder con el registro
-        const query = `INSERT INTO alu3 (apenomb, dni, carrera, curso, fecha) VALUES (?, ?, ?, ?,?)`;
+        const query = `INSERT INTO docentes (apenomb, dni, email) VALUES (?, ?, ?)`;
         const fecha = new Date();
 
-        db.query(query, [apenomb, dni, carrera, anio, fecha], (err, result) => {
+        db.query(query, [apenomb, dni, email], (err, result) => {
             if (err) {
-                console.log('Error al registrar alumno:', err);
-                res.json({ success: false, message: 'Error al registrar alumno.' });
+                console.log('Error al registrar Docente:', err);
+                res.json({ success: false, message: 'Error al registrar Docente.' });
             } else {
-                res.json({ success: true, message: 'Alumno registrado con éxito.' });
+                res.json({ success: true, message: 'Docente registrado con éxito.' });
             }
         });
     });
 });
 
 app.post('/registrar-asistencia', (req, res) => {
-    const { idestudiante } = req.body;
+    const { iddocentes } = req.body;
 
     // Ajustar a hora local (Argentina, UTC-3)
     const now = new Date();
@@ -124,18 +124,18 @@ app.post('/registrar-asistencia', (req, res) => {
     const fechaLocal = new Date(now.getTime() - offset);
     const fechaFormatted = fechaLocal.toISOString().split('T')[0];
 
-    console.log(`Verificando asistencia de: ${idestudiante} para el día: ${fechaFormatted}`);
+    console.log(`Verificando asistencia de: ${iddocentes} para el día: ${fechaFormatted}`);
 
-    const checkQuery = `SELECT * FROM asis3 WHERE idestudiante = ? AND fecha = ?`;
-    db.query(checkQuery, [idestudiante, fechaFormatted], (err, result) => {
+    const checkQuery = `SELECT * FROM asisd WHERE iddocentes = ? AND fecha = ?`;
+    db.query(checkQuery, [iddocentes, fechaFormatted], (err, result) => {
         if (err) return res.json({ success: false, message: 'Error al verificar asistencia.' });
 
         if (result.length > 0) {
-            return res.json({ success: false, message: 'El alumno ya registró asistencia hoy.' });
+            return res.json({ success: false, message: 'El docente ya registró asistencia hoy.' });
         }
 
-        const insertQuery = `INSERT INTO asis3 (idestudiante, fecha, estado) VALUES (?, ?, ?)`;
-        db.query(insertQuery, [idestudiante, fechaFormatted, 'Presente'], (err, result) => {
+        const insertQuery = `INSERT INTO asisd (iddocentes, fecha, estado) VALUES (?, ?, ?)`;
+        db.query(insertQuery, [iddocentes, fechaFormatted, 'Presente'], (err, result) => {
             if (err) return res.json({ success: false, message: 'Error al registrar asistencia.' });
             return res.json({ success: true, message: 'Asistencia registrada con éxito.' });
         });
@@ -148,8 +148,8 @@ app.post('/consultar-asistencia', (req, res) => {
     const { dni } = req.body;
     const query = `
         SELECT a.idasistencia, al.apenomb, a.fecha, a.estado 
-        FROM asis3 a
-        JOIN alu3 al ON a.idestudiante = al.idestudiante
+        FROM asisd a
+        JOIN docentes al ON a.iddocentes = al.iddocentes
         WHERE al.dni = ?
     `;
 
@@ -172,8 +172,8 @@ app.get('/asistencia', (req, res) => {
         return res.status(400).json({ error: 'Debe proporcionar una fecha' });
     }
     const sql = `SELECT a.idasistencia, al.apenomb, al.dni,al.carrera,a.fecha, a.estado 
-                 FROM asis3 a 
-                 JOIN alu3 al ON a.idestudiante = al.idestudiante
+                 FROM asisd a 
+                 JOIN docentes al ON a.iddocentes = al.iddocentes
                  WHERE a.fecha = ?`;
 
     db.query(sql, [fecha], (error, results) => {
@@ -203,8 +203,8 @@ app.get('/asistencia/pdf', (req, res) => {
     // Consulta actualizada para obtener los datos de asistencia
     const query = `
         SELECT a.idasistencia, al.apenomb, al.dni, al.carrera, a.fecha, a.estado 
-        FROM asis3 a 
-        JOIN alu3 al ON a.idestudiante = al.idestudiante
+        FROM asisd a 
+        JOIN docentes al ON a.iddocentes = al.iddocentes
         WHERE DATE(a.fecha) = ?
     `; 
 
@@ -232,17 +232,15 @@ app.get('/asistencia/pdf', (req, res) => {
                         body: [
                             [
                                 { text: 'ID', style: 'tableHeader' },
-                                { text: 'Alumno', style: 'tableHeader' },
-                                { text: 'Documento', style: 'tableHeader' },
-                                { text: 'Carrera', style: 'tableHeader' },
+                                { text: 'Docente', style: 'tableHeader' },
+                                { text: 'Documento', style: 'tableHeader' },                                
                                 { text: 'Fecha', style: 'tableHeader' },
                                 { text: 'Estado', style: 'tableHeader' }
                             ],
                             ...results.map(asistencia => [
                                 asistencia.idasistencia,
                                 asistencia.apenomb,
-                                asistencia.dni,
-                                asistencia.carrera,
+                                asistencia.dni,                             
                                 asistencia.fecha ? new Date(asistencia.fecha).toLocaleDateString('es-AR') : '',
                                 asistencia.estado
                             ])

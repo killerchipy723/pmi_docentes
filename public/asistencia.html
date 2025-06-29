@@ -14,11 +14,11 @@
                 <label for="dni">Ingrese su DNI</label>
                 <input type="text" class="form-control" id="dni" name="dni" required>
             </div>
-            <button type="submit" class="btn btn-primary">Buscar Alumno</button>
+            <button type="submit" class="btn btn-primary">Buscar Docente</button>
         </form>
 
         <div id="alumnoInfo" style="display:none; margin-top:20px;">
-            <h4>Datos del Alumno</h4>
+            <h4>Datos del Docente</h4>
             <p id="nombreAlumno"></p>
             <button id="darPresenteBtn" class="btn btn-success">Dar Presente</button>
         </div>
@@ -62,7 +62,7 @@
                 if (data.success) {
                     document.getElementById('nombreAlumno').textContent = `Nombre: ${data.alumno.apenomb}`;
                     document.getElementById('alumnoInfo').style.display = 'block';
-                    document.getElementById('darPresenteBtn').dataset.idestudiante = data.alumno.idestudiante;
+                    document.getElementById('darPresenteBtn').dataset.iddocentes = data.alumno.iddocentes;
 
                     alertMessage.style.display = 'none';
                 } else {
@@ -76,12 +76,12 @@
 
         // Evento para registrar asistencia
         document.getElementById('darPresenteBtn').addEventListener('click', function () {
-            const idestudiante = this.dataset.idestudiante;
+            const iddocentes = this.dataset.iddocentes;
 
             fetch('/registrar-asistencia', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
-                body: new URLSearchParams({ idestudiante })
+                body: new URLSearchParams({ iddocentes })
                 
             })
             .then(response => response.json())

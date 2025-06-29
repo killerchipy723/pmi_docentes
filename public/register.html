@@ -3,12 +3,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Registro de Alumnos</title>
+    <title>Registro de Docentes</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
 </head>
 <body>
     <div class="container">
-        <h2>Registrar Alumno</h2>
+        <h2>Registrar Docente</h2>
         <form id="registerForm">
             <div class="form-group">
                 <label for="apenomb">Nombre y Apellido</label>
@@ -18,31 +18,11 @@
                 <label for="dni">DNI</label>
                 <input type="text" class="form-control" id="dni" name="dni" required>
             </div>
-            <div class="form-group">
-                <label for="carrera">Carrera</label>
-                <select class="form-control" id="carrera" name="carrera" required>
-                    <!-- Opciones de carrera -->
-                    <option value="Prof. de Informática">Prof. de Informática</option>
-                   <option value="Prof. de Informática">Prof. de Historia</option>
-                   <option value="Prof. de Informática">Prof. de Lengua y Literatura</option>
-                   <option value="Prof. de Informática">Prof. de Ed. Especial</option>
-                   <option value="Prof. de Informática">Prof. de Biología</option>
-                   <option value="Prof. de Informática">Tec. Sup. en Gestión Pública</option>
-                   <option value="Prof. de Informática">Tec. Sup. en Seguridad e Higiere en el Trabajo</option>
-                   <option value="Prof. de Informática">Tec. Sup. en Laboratorio</option>
-                   <option value="Prof. de Informática">Tec. Sup. en Informática</option>
-                   <option value="Prof. de Informática">Otros</option>
-                </select>
-            </div>
-            <div class="form-group">
-                <label for="anio">Año</label>
-                <select class="form-control" id="anio" name="anio" required>
-                    <option value="1">1er Año</option>
-                    <option value="2">2do Año</option>
-                    <option value="3">3er Año</option>
-                    <option value="4">4to Año</option>
-                </select>
-            </div>
+             <div class="form-group">
+                <label for="email">Correo Electrónico</label>
+                <input type="email" class="form-control" id="email" name="email" required>
+            </div>           
+            
             <button type="submit" class="btn btn-primary">Registrar</button>
         </form>
 
