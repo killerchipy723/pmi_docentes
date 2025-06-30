@@ -60,6 +60,10 @@ app.get('/register-page', (req, res) => {
     res.sendFile(path.join(__dirname, 'public/register.html'));
 });
 
+app.get('/inscripcion-page', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/inscripcion.html'));
+});
+
 
 // Ruta para servir la página de asistencia
 app.get('/attendance-page', (req, res) => {
@@ -194,6 +198,29 @@ app.get('/asistencia', (req, res) => {
         res.json(results); // Devolver los resultados en formato JSON
     });
 });
+
+app.get('/cupos-capacitacion', (req, res) => {
+    const query = `
+      SELECT capacitacion, COUNT(*) AS cantidad
+      FROM inscripciones
+      GROUP BY capacitacion
+    `;
+
+    db.query(query, (err, result) => {
+        if (err) {
+            return res.status(500).send({ error: 'Error al consultar los cupos' });
+        }
+
+        // Convertir a formato {1: X, 2: Y, 3: Z}
+        const cupos = { 1: 0, 2: 0, 3: 0 };
+        result.forEach(row => {
+            cupos[row.capacitacion] = row.cantidad;
+        });
+
+        res.send({ success: true, cupos });
+    });
+});
+
 
 
 // Ruta para generar el PDF con los datos de asistencia
