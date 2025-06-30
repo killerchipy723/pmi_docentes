@@ -15,6 +15,7 @@ const port = 6100;
  
 // Configurar middleware
 app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json());
 app.use(express.static('public'));
 
 // Función para manejar la reconexión automática
@@ -218,6 +219,44 @@ app.get('/cupos-capacitacion', (req, res) => {
         });
 
         res.send({ success: true, cupos });
+    });
+});
+
+app.post("/buscar-docente", (req, res) => {
+  const { dni } = req.body;
+  const query = "SELECT * FROM docentes WHERE dni = ?";
+  db.query(query, [dni], (err, result) => {
+    if (err) return res.send({ error: "Error en la búsqueda" });
+    if (result.length > 0) res.send({ success: true, docente: result[0] });
+    else res.send({ success: false, message: "Docente no encontrado" });
+  });
+});
+
+
+app.post('/inscribir-docente', (req, res) => {
+    const { id_docente, capacitacion } = req.body;
+
+    const countQuery = 'SELECT COUNT(*) AS cantidad FROM inscripciones WHERE capacitacion = ?';
+
+    db.query(countQuery, [capacitacion], (err, countResult) => {
+        if (err) {
+            return res.status(500).send({ error: 'Error al verificar cupos' });
+        }
+
+        const cantidad = countResult[0].cantidad;
+
+        if (cantidad >= 3) {
+            return res.send({ success: false, message: 'No hay cupos disponibles para esta capacitación' });
+        }
+
+        const insertQuery = 'INSERT INTO inscripciones (iddocente, capacitacion) VALUES (?, ?)';
+        db.query(insertQuery, [id_docente, capacitacion], (err, insertResult) => {
+            if (err) {
+                return res.status(500).send({ error: 'Error al inscribir al docente' });
+            }
+
+            res.send({ success: true, message: 'Inscripción realizada correctamente' });
+        });
     });
 });
 
