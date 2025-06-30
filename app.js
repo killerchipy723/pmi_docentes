@@ -234,31 +234,56 @@ app.post("/buscar-docente", (req, res) => {
 
 
 app.post('/inscribir-docente', (req, res) => {
-    const { id_docente, capacitacion } = req.body;
+  const { id_docente, capacitacion } = req.body;
 
+  // Primero verificamos si el docente ya está inscripto en alguna capacitación
+  const checkQuery = 'SELECT * FROM inscripciones WHERE iddocente = ?';
+
+  db.query(checkQuery, [id_docente], (err, existing) => {
+    if (err) {
+      return res.status(500).send({ success: false, message: 'Error al verificar inscripción previa.' });
+    }
+
+    if (existing.length > 0) {
+      return res.send({
+        success: false,
+        message: 'El docente ya está inscripto en una capacitación.',
+      });
+    }
+
+    // Luego verificamos si hay cupo en la capacitación seleccionada
     const countQuery = 'SELECT COUNT(*) AS cantidad FROM inscripciones WHERE capacitacion = ?';
 
     db.query(countQuery, [capacitacion], (err, countResult) => {
-        if (err) {
-            return res.status(500).send({ error: 'Error al verificar cupos' });
-        }
+      if (err) {
+        return res.status(500).send({ success: false, message: 'Error al verificar cupos.' });
+      }
 
-        const cantidad = countResult[0].cantidad;
+      const cantidad = countResult[0].cantidad;
 
-        if (cantidad >= 3) {
-            return res.send({ success: false, message: 'No hay cupos disponibles para esta capacitación' });
-        }
-
-        const insertQuery = 'INSERT INTO inscripciones (iddocente, capacitacion) VALUES (?, ?)';
-        db.query(insertQuery, [id_docente, capacitacion], (err, insertResult) => {
-            if (err) {
-                return res.status(500).send({ error: 'Error al inscribir al docente' });
-            }
-
-            res.send({ success: true, message: 'Inscripción realizada correctamente' });
+      if (cantidad >= 3) {
+        return res.send({
+          success: false,
+          message: 'No hay cupos disponibles para esta capacitación.',
         });
+      }
+
+      // Si todo está OK, insertamos la inscripción
+      const insertQuery = 'INSERT INTO inscripciones (iddocente, capacitacion) VALUES (?, ?)';
+      db.query(insertQuery, [id_docente, capacitacion], (err, insertResult) => {
+        if (err) {
+          return res.status(500).send({ success: false, message: 'Error al registrar inscripción.' });
+        }
+
+        res.send({
+          success: true,
+          message: 'Inscripción realizada correctamente.',
+        });
+      });
     });
+  });
 });
+
 
 
 
