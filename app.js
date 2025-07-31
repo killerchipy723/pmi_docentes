@@ -288,7 +288,9 @@ app.post('/inscribir-docente', (req, res) => {
 
 // Ruta: GET /listar-inscriptos
 app.get('/api/inscriptos', (req, res) => {
-    let filtro = req.query.capacitacion; // opcional
+    let filtro = req.query.capacitacion;
+    console.log("Filtro recibido:", filtro); // LOG
+
     let sql = `
         SELECT d.apenomb, d.dni, i.capacitacion, i.fecha
         FROM inscripciones i
@@ -297,11 +299,13 @@ app.get('/api/inscriptos', (req, res) => {
 
     if (filtro) {
         sql += ` WHERE i.capacitacion = ?`;
+        console.log("Consulta SQL:", sql); // LOG
         db.query(sql, [filtro], (err, results) => {
             if (err) {
                 console.error('Error al obtener datos:', err);
                 return res.status(500).json({ error: 'Error en el servidor' });
             }
+            console.log("Resultados:", results); // LOG
             res.json(results);
         });
     } else {
@@ -310,6 +314,7 @@ app.get('/api/inscriptos', (req, res) => {
                 console.error('Error al obtener datos:', err);
                 return res.status(500).json({ error: 'Error en el servidor' });
             }
+            console.log("Resultados sin filtro:", results); // LOG
             res.json(results);
         });
     }
