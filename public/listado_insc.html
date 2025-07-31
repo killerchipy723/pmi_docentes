@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Listado de Inscriptos</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background-color: #f4f4f4;
+      margin: 0;
+      padding: 20px;
+    }
+
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+
+    .filter {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    select, button {
+      padding: 10px;
+      margin: 5px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: white;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+      padding: 12px;
+      border: 1px solid #ddd;
+      text-align: left;
+    }
+
+    th {
+      background-color: #007BFF;
+      color: white;
+    }
+
+    @media (max-width: 600px) {
+      table, thead, tbody, th, td, tr {
+        display: block;
+      }
+      td {
+        text-align: right;
+        position: relative;
+        padding-left: 50%;
+      }
+      td::before {
+        content: attr(data-label);
+        position: absolute;
+        left: 10px;
+        font-weight: bold;
+        text-align: left;
+      }
+    }
+
+    .export-btn {
+      background-color: #28a745;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+
+    .export-btn:hover {
+      background-color: #218838;
+    }
+
+    .btn-exportar {
+    background-color: #28a745;
+    color: white;
+    padding: 10px 18px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    margin: 15px;
+    font-size: 16px;
+    transition: background 0.3s;
+}
+
+.btn-exportar:hover {
+    background-color: #218838;
+}
+  </style>
+</head>
+<body>
+  <h1>Listado de Inscriptos</h1>
+
+  <div class="filter">
+    <label for="capacitacion">Filtrar por capacitación:</label>
+    <select id="capacitacion" onchange="cargarInscriptos()">
+      <option value="">-- Todas --</option>
+      <option value="Capacitación 1">Capacitación 1</option>
+      <option value="Capacitación 2">Capacitación 2</option>
+      <option value="Capacitación 3">Capacitación 3</option>
+    </select>
+    <button onclick="exportarExcel()" class="btn-exportar">📥 Exportar a Excel</button>
+
+  </div>
+
+  <table id="tablaInscriptos">
+    <thead>
+      <tr>
+        <th>Apellido y Nombre</th>
+        <th>DNI</th>
+        <th>Capacitación</th>
+        <th>Fecha</th>
+      </tr>
+    </thead>
+    <tbody></tbody>
+  </table>
+
+  <script>
+    async function cargarInscriptos() {
+      const filtro = document.getElementById('capacitacion').value;
+      const res = await fetch(`/api/inscriptos${filtro ? '?capacitacion=' + encodeURIComponent(filtro) : ''}`);
+      const data = await res.json();
+
+      const tbody = document.querySelector('#tablaInscriptos tbody');
+      tbody.innerHTML = '';
+
+      if (data.length === 0) {
+        const tr = document.createElement('tr');
+        tr.innerHTML = '<td colspan="4">No se encontraron inscriptos.</td>';
+        tbody.appendChild(tr);
+      } else {
+        data.forEach(row => {
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td data-label="Apellido y Nombre">${row.apenomb}</td>
+            <td data-label="DNI">${row.dni}</td>
+            <td data-label="Capacitación">${row.capacitacion}</td>
+            <td data-label="Fecha">${new Date(row.fecha).toLocaleDateString()}</td>
+          `;
+          tbody.appendChild(tr);
+        });
+      }
+    }
+
+    function exportarExcel() {
+      const table = document.getElementById('tablaInscriptos');
+      const rows = Array.from(table.querySelectorAll('tr')).map(tr =>
+        Array.from(tr.querySelectorAll('th, td')).map(td => td.innerText)
+      );
+
+      let csv = rows.map(r => r.join(',')).join('\n');
+      let blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+      let url = URL.createObjectURL(blob);
+
+      let a = document.createElement('a');
+      a.href = url;
+      a.download = 'inscriptos.csv';
+      a.click();
+    }
+
+    window.onload = cargarInscriptos;
+  </script>
+  <script>
+function exportarExcel() {
+    window.location.href = '/exportar-excel';
+}
+</script>
+
+</body>
+</html>

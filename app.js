@@ -284,6 +284,80 @@ app.post('/inscribir-docente', (req, res) => {
   });
 });
 
+//lsitar inscripciones 
+
+// Ruta: GET /listar-inscriptos
+app.get('/api/inscriptos', (req, res) => {
+    let filtro = req.query.capacitacion; // opcional
+    let sql = `
+        SELECT d.apenomb, d.dni, i.capacitacion, i.fecha
+        FROM inscripciones i
+        JOIN docentes d ON d.iddocentes = i.iddocente
+    `;
+
+    if (filtro) {
+        sql += ` WHERE i.capacitacion = ?`;
+        db.query(sql, [filtro], (err, results) => {
+            if (err) {
+                console.error('Error al obtener datos:', err);
+                return res.status(500).json({ error: 'Error en el servidor' });
+            }
+            res.json(results);
+        });
+    } else {
+        db.query(sql, (err, results) => {
+            if (err) {
+                console.error('Error al obtener datos:', err);
+                return res.status(500).json({ error: 'Error en el servidor' });
+            }
+            res.json(results);
+        });
+    }
+});
+
+//Exportar Excel
+
+const excelJS = require('exceljs');
+
+// Ruta para exportar inscripciones a Excel
+app.get('/exportar-excel', (req, res) => {
+    const sql = `SELECT d.apenomb, d.dni, i.capacitacion, i.fecha
+                 FROM inscripciones i
+                 JOIN docentes d ON d.iddocentes = i.iddocente`;
+
+    db.query(sql, async (err, results) => {
+        if (err) {
+            console.error('Error al obtener datos para Excel:', err);
+            return res.status(500).send('Error al generar Excel');
+        }
+
+        const workbook = new excelJS.Workbook();
+        const worksheet = workbook.addWorksheet('Inscripciones');
+
+        // Definir columnas
+        worksheet.columns = [
+            { header: 'Apellido y Nombre', key: 'apenomb', width: 30 },
+            { header: 'DNI', key: 'dni', width: 15 },
+            { header: 'Capacitación', key: 'capacitacion', width: 20 },
+            { header: 'Fecha', key: 'fecha', width: 20 }
+        ];
+
+        // Agregar filas
+        results.forEach(row => {
+            worksheet.addRow(row);
+        });
+
+        // Encabezados de respuesta
+        res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
+        res.setHeader('Content-Disposition', 'attachment; filename=inscripciones.xlsx');
+
+        await workbook.xlsx.write(res);
+        res.end();
+    });
+});
+
+
+
 
 
 
