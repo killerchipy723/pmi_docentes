@@ -87,6 +87,18 @@
     }
   }
 
+  .calendar-card h5 i {
+  margin-right: 8px;
+  color: #333;
+}
+
+.calendar-card p {
+  margin-top: 5px;
+  font-size: 0.95rem;
+  color: #555;
+}
+
+
   @media (max-width: 480px) {
     .calendar-card h5 {
       font-size: 16px;
@@ -117,27 +129,31 @@
     <div id="nombreDocente" class="mb-3"></div>
 
     <!-- Calendarios -->
-    <div id="calendarSection" class="calendar-section">
-      <div class="calendar-title">
-        Seleccione el encuentro en el que desea inscribirse
-      </div>
-      <div class="calendar-options">
-        <div class="calendar-card" onclick="inscribir(1)">
-          <h5>Capacitación 1</h5>
-          <div id="cupos1" style="margin-top: 10px; font-weight: bold"></div>
-        </div>
-
-        <div class="calendar-card" onclick="inscribir(2)">
-          <h5>Capacitación 2</h5>
-          <div id="cupos2" style="margin-top: 10px; font-weight: bold"></div>
-        </div>
-
-        <div class="calendar-card" onclick="inscribir(3)">
-          <h5>Capacitación 3</h5>
-          <div id="cupos3" style="margin-top: 10px; font-weight: bold"></div>
-        </div>
-      </div>
+<div id="calendarSection" class="calendar-section">
+  <div class="calendar-title">
+    Seleccione el encuentro en el que desea inscribirse
+  </div>
+  <div class="calendar-options">
+    <div class="calendar-card" onclick="inscribir(1)">
+      <h5><i class="fa-solid fa-calendar-days"></i> Capacitación 1</h5>
+      <p><strong>Fecha:</strong> Lunes 4</p>
+      <div id="cupos1" style="margin-top: 10px; font-weight: bold"></div>
     </div>
+
+    <div class="calendar-card" onclick="inscribir(2)">
+      <h5><i class="fa-solid fa-calendar-days"></i> Capacitación 2</h5>
+      <p><strong>Fecha:</strong> Miércoles 5</p>
+      <div id="cupos2" style="margin-top: 10px; font-weight: bold"></div>
+    </div>
+
+    <div class="calendar-card" onclick="inscribir(3)">
+      <h5><i class="fa-solid fa-calendar-days"></i> Capacitación 3</h5>
+      <p><strong>Fecha:</strong> Viernes 8</p>
+      <div id="cupos3" style="margin-top: 10px; font-weight: bold"></div>
+    </div>
+  </div>
+</div>
+
   </div>
 
   <script>
@@ -175,7 +191,7 @@
         .then((data) => {
           if (data.success) {
             for (let i = 1; i <= 3; i++) {
-              const disponibles = 3 - (data.cupos[i] || 0);
+              const disponibles = 17 - (data.cupos[i] || 0);
               const cupoDiv = document.getElementById("cupos" + i);
               if (disponibles <= 0) {
                 cupoDiv.textContent = "Sin cupos disponibles";

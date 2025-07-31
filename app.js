@@ -261,7 +261,7 @@ app.post('/inscribir-docente', (req, res) => {
 
       const cantidad = countResult[0].cantidad;
 
-      if (cantidad >= 3) {
+      if (cantidad >= 17) {
         return res.send({
           success: false,
           message: 'No hay cupos disponibles para esta capacitación.',
