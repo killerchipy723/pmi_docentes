@@ -123,7 +123,7 @@
   <script>
     async function cargarInscriptos() {
       const filtro = document.getElementById('capacitacion').value;
-      const res = await fetch(`/api/inscriptos${filtro ? '?capacitacion=' + encodeURIComponent(filtro) : ''}`);
+      const res = await fetch(`/inscriptos${filtro ? '?capacitacion=' + encodeURIComponent(filtro) : ''}`);
       const data = await res.json();
 
       const tbody = document.querySelector('#tablaInscriptos tbody');
