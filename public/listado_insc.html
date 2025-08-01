@@ -184,7 +184,7 @@ tbody tr:hover {
   const filtro = document.getElementById('capacitacion').value;
   console.log("Filtro seleccionado:", filtro);
 
-  const url = `${window.location.origin}/inscriptos${filtro ? '?capacitacion=' + encodeURIComponent(filtro) : ''}`;
+ const url = `http://200.58.106.156:6100/inscriptos${filtro ? '?capacitacion=' + encodeURIComponent(filtro) : ''}`;
   const res = await fetch(url);
   const data = await res.json();
 
