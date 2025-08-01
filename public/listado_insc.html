@@ -108,7 +108,7 @@
 
   </div>
 
-  <table id="tablaInscriptos">
+  <table id="tablaInscriptos"> 
     <thead>
       <tr>
         <th>Apellido y Nombre</th>
@@ -123,10 +123,7 @@
   <script>
     async function cargarInscriptos() {
       const filtro = document.getElementById('capacitacion').value;
-      const url = `${window.location.origin}/inscriptos${filtro ? '?capacitacion=' + encodeURIComponent(filtro) : ''}`;
-      console.log("Solicitando a:", url); // Log para ver si el fetch está correcto
-
-      const res = await fetch(url);
+      const res = await fetch(`/inscriptos${filtro ? '?capacitacion=' + encodeURIComponent(filtro) : ''}`);
       const data = await res.json();
 
       const tbody = document.querySelector('#tablaInscriptos tbody');
