@@ -288,26 +288,30 @@ app.post('/inscribir-docente', (req, res) => {
 
 // Ruta: GET /listar-inscriptos
 app.get('/inscriptos', (req, res) => {
-    let filtro = req.query.capacitacion; // opcional
+    let filtro = req.query.capacitacion;
+    console.log("Filtro recibido:", filtro);
+
     let sql = `
         SELECT d.apenomb, d.dni, i.capacitacion, i.fecha
         FROM inscripciones i
         JOIN docentes d ON d.iddocentes = i.iddocente
     `;
 
-    if (filtro) {
+    if (filtro && filtro.trim() !== '') {
         sql += ` WHERE i.capacitacion = ?`;
+        console.log("Consulta con filtro:", sql, " - Valor:", filtro);
         db.query(sql, [filtro], (err, results) => {
             if (err) {
-                console.error('Error al obtener datos:', err);
+                console.error('Error al obtener datos con filtro:', err);
                 return res.status(500).json({ error: 'Error en el servidor' });
             }
             res.json(results);
         });
     } else {
+        console.log("Consulta sin filtro:", sql);
         db.query(sql, (err, results) => {
             if (err) {
-                console.error('Error al obtener datos:', err);
+                console.error('Error al obtener datos sin filtro:', err);
                 return res.status(500).json({ error: 'Error en el servidor' });
             }
             res.json(results);
@@ -315,17 +319,31 @@ app.get('/inscriptos', (req, res) => {
     }
 });
 
+
 //Exportar Excel
 
-const excelJS = require('exceljs');
-
-// Ruta para exportar inscripciones a Excel
 app.get('/exportar-excel', (req, res) => {
-    const sql = `SELECT d.apenomb, d.dni, i.capacitacion, i.fecha
-                 FROM inscripciones i
-                 JOIN docentes d ON d.iddocentes = i.iddocente`;
+    const filtro = req.query.capacitacion;
+    let sql = `
+        SELECT d.apenomb, d.dni, i.capacitacion, i.fecha
+        FROM inscripciones i
+        JOIN docentes d ON d.iddocentes = i.iddocente
+    `;
+    let params = [];
 
-    db.query(sql, async (err, results) => {
+    // Mapeo de nombres visibles a valores reales
+    const capacitacionMap = {
+        'Capacitación 1': 1,
+        'Capacitación 2': 2,
+        'Capacitación 3': 3
+    };
+
+    if (filtro && capacitacionMap[filtro]) {
+        sql += ` WHERE i.capacitacion = ?`;
+        params.push(capacitacionMap[filtro]);
+    }
+
+    db.query(sql, params, async (err, results) => {
         if (err) {
             console.error('Error al obtener datos para Excel:', err);
             return res.status(500).send('Error al generar Excel');
@@ -347,14 +365,14 @@ app.get('/exportar-excel', (req, res) => {
             worksheet.addRow(row);
         });
 
-        // Encabezados de respuesta
+        // Enviar el archivo Excel
         res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet');
         res.setHeader('Content-Disposition', 'attachment; filename=inscripciones.xlsx');
-
         await workbook.xlsx.write(res);
         res.end();
     });
 });
+
 
 
 
