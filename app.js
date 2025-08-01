@@ -287,7 +287,7 @@ app.post('/inscribir-docente', (req, res) => {
 //lsitar inscripciones 
 
 // Ruta: GET /listar-inscriptos
-app.get('/api/inscriptos', (req, res) => {
+app.get('/inscriptos', (req, res) => {
     let filtro = req.query.capacitacion; // opcional
     let sql = `
         SELECT d.apenomb, d.dni, i.capacitacion, i.fecha
