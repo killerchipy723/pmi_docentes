@@ -322,6 +322,9 @@ app.get('/inscriptos', (req, res) => {
     }
 });
 
+app.get('/listado', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public/listado_insc.html'));
+});
 
 //Exportar Excel
 const excelJS = require('exceljs');
