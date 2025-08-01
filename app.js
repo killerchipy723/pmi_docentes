@@ -321,7 +321,7 @@ app.get('/inscriptos', (req, res) => {
 
 
 //Exportar Excel
-
+const excelJS = require('exceljs');
 app.get('/exportar-excel', (req, res) => {
     const filtro = req.query.capacitacion;
     let sql = `
