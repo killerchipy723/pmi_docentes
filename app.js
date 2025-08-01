@@ -10,6 +10,9 @@ const PDFDocument = require('pdfkit');
 const pdfmake = require('pdfmake/build/pdfmake');
 const vfsFonts = require('pdfmake/build/vfs_fonts');
 pdfmake.vfs = vfsFonts.pdfMake.vfs; // Cargar fuentes
+const cors = require('cors');
+
+
 
 const port = 6100;
  
@@ -17,6 +20,7 @@ const port = 6100;
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static('public'));
+app.use(cors());
 
 // Función para manejar la reconexión automática
 let db;
