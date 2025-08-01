@@ -10,9 +10,6 @@ const PDFDocument = require('pdfkit');
 const pdfmake = require('pdfmake/build/pdfmake');
 const vfsFonts = require('pdfmake/build/vfs_fonts');
 pdfmake.vfs = vfsFonts.pdfMake.vfs; // Cargar fuentes
-const cors = require('cors');
-
-
 
 const port = 6100;
  
@@ -20,7 +17,6 @@ const port = 6100;
 app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static('public'));
-app.use(cors());
 
 // Función para manejar la reconexión automática
 let db;
@@ -291,10 +287,8 @@ app.post('/inscribir-docente', (req, res) => {
 //lsitar inscripciones 
 
 // Ruta: GET /listar-inscriptos
-app.get('/inscriptos', (req, res) => {
-    let filtro = req.query.capacitacion;
-    console.log("Filtro recibido:", filtro); // LOG
-
+app.get('/api/inscriptos', (req, res) => {
+    let filtro = req.query.capacitacion; // opcional
     let sql = `
         SELECT d.apenomb, d.dni, i.capacitacion, i.fecha
         FROM inscripciones i
@@ -303,13 +297,11 @@ app.get('/inscriptos', (req, res) => {
 
     if (filtro) {
         sql += ` WHERE i.capacitacion = ?`;
-        console.log("Consulta SQL:", sql); // LOG
         db.query(sql, [filtro], (err, results) => {
             if (err) {
                 console.error('Error al obtener datos:', err);
                 return res.status(500).json({ error: 'Error en el servidor' });
             }
-            console.log("Resultados:", results); // LOG
             res.json(results);
         });
     } else {
@@ -318,7 +310,6 @@ app.get('/inscriptos', (req, res) => {
                 console.error('Error al obtener datos:', err);
                 return res.status(500).json({ error: 'Error en el servidor' });
             }
-            console.log("Resultados sin filtro:", results); // LOG
             res.json(results);
         });
     }
